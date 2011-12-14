@@ -38,17 +38,24 @@ def display(txt):
     stdout.write(txt)
     stdout.flush()
 
+def message(msg):
+    system(MSG_CMD % msg)
+
 start = time()
 
 # get a time
 if len(argv) > 1:
-    raw = argv[1]
+    raw = argv[1:]
 else:
-    raw = raw_input("Enter time to wait: ")
+    raw = raw_input("Enter time to wait: ").split()
 
 # do we have a message?
-if len(argv) > 2:
-    msg = " ".join(argv[2:])
+if "--" in raw:
+    split = raw.index("--")
+
+    msg = " ".join(raw[split+1:])
+    raw = raw[:split]
+
     msg += " " * max(0, 8 - len(msg))
 else:
     msg = "Time is up!"
@@ -60,15 +67,24 @@ factors = {
         'h': 60 * 60,
         }
 
-# factor parsing, if any (defaults to seconds)
-if raw[-1] in factors:
-    factor = factors[raw[-1]]
-    raw = raw[:-1]
-else:
-    factor = 1
+wait = 0
 
-# determine end point (TODO: parsing might fail with an exception)
-wait = int(raw) * factor
+for part in raw:
+    # factor parsing, if any (defaults to seconds)
+    if part[-1] in factors:
+        factor = factors[part[-1]]
+        number = part[:-1]
+    else:
+        factor = 1
+        number = part
+
+    # determine end point (TODO: parsing might fail with an exception)
+    wait += int(number) * factor
+
+if wait <= 0:
+    message("Did not have to wait at all")
+    sys.exit(1)
+
 target = start + wait
 
 try:
@@ -76,7 +92,7 @@ try:
         # get a nice output
         left = int(target - time() + 0.1)
         parts = (left / 60 / 60, left / 60 % 60, left % 60)
-        display("\r%02i:%02i:%02i " % parts)
+        display("%02i:%02i:%02i " % parts)
 
         # wait for the next full second
         sleep((target - time()) % 1)
@@ -90,5 +106,5 @@ else:
     print
 
     system(SOUND_CMD % SOUND_FILE)
-    system(MSG_CMD % msg)
+    message(msg)
 
