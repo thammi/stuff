@@ -19,7 +19,7 @@
 ##############################################################################
 
 # Usage:
-# ./alarm.py TIME[h/m/s] [finish message]
+# ./alarm.py TIME[h/m/s] [..] [-- finish message]
 
 from sys import argv, exit, stdout
 from time import time, sleep

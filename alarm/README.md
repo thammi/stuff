@@ -3,7 +3,7 @@
 This python script implements a simple alarm clock. It can be executed with the
 following syntax:
 
-    alarm TIME [TIME ...] [-- Your message]
+    alarm TIME[h/m/s] [...] [-- Your message]
 
 It accepts multiple time descriptors which can add seconds, minutes or hours to
 the alarm delay. The remaining time is displayed in your terminal.
