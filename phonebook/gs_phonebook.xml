@@ -53,6 +53,9 @@ for fn in os.listdir(vcard_path):
 
     vcard = vobject.readOne(open(path))
 
+    if 'tel' not in vcard.contents:
+	continue
+
     tel_entries = vcard.contents['tel']
 
     for tel in tel_entries:
