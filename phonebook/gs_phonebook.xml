@@ -53,11 +53,18 @@ for fn in os.listdir(vcard_path):
 
     vcard = vobject.readOne(open(path))
 
-    for tel in vcard.contents['tel']:
+    tel_entries = vcard.contents['tel']
+
+    for tel in tel_entries:
 	out.startElement('Contact')
 
 	out.startElement('LastName')
-	out.characters(tel.params['TYPE'][0].capitalize())
+
+	if len(tel_entries) > 1:
+	    out.characters(tel.params['TYPE'][0].capitalize())
+	else:
+	    out.characters(sanitize(vcard.n.value.family))
+
 	out.endElement('LastName')
 
 	out.startElement('FirstName')
