@@ -6,17 +6,15 @@ import sys
 import os
 import os.path
 
-import xml.dom.minidom
+from xml.sax.saxutils import XMLGenerator
+from xml.sax.xmlreader import AttributesNSImpl
 
 import vobject
 
 import cgitb
 cgitb.enable()
 
-import codecs
-import locale
-
-VCARD_DIR = "~/.phone/"
+VCARD_DIR = "/home/thammi/.phone/"
 
 def sanitize(txt):
     replaces = [
@@ -36,9 +34,17 @@ def sanitize(txt):
 print "Content-Type: text/xml"
 print
 
-impl = xml.dom.minidom.getDOMImplementation()
-doc = impl.createDocument(None, 'AddressBook', None)
-element = doc.documentElement
+class SimpleXMLGenerator(XMLGenerator):
+
+    def startElement(self, name, attrs=None):
+	if attrs == None:
+	    attrs = AttributesNSImpl({}, {})
+
+        XMLGenerator.startElement(self, name, attrs)
+
+out = SimpleXMLGenerator(sys.stdout, 'utf-8')
+out.startDocument()
+out.startElement('AddressBook')
 
 vcard_path = os.path.expanduser(VCARD_DIR)
 
@@ -48,27 +54,29 @@ for fn in os.listdir(vcard_path):
     vcard = vobject.readOne(open(path))
 
     for tel in vcard.contents['tel']:
-	contact = doc.createElement('Contact')
+	out.startElement('Contact')
 
-	phone = doc.createElement('Phone')
+	out.startElement('LastName')
+	out.characters(tel.params['TYPE'][0].capitalize())
+	out.endElement('LastName')
 
-	last = doc.createElement('LastName')
-	last.appendChild(doc.createTextNode(tel.params['TYPE'][0].capitalize()))
-	contact.appendChild(last)
+	out.startElement('FirstName')
+	out.characters(sanitize(vcard.n.value.given))
+	out.endElement('FirstName')
 
-	first = doc.createElement('FirstName')
-	first.appendChild(doc.createTextNode(sanitize(vcard.n.value.given)))
-	contact.appendChild(first)
+	out.startElement('Phone')
 
-	phone = doc.createElement('Phone')
+	out.startElement('phonenumber')
+	out.characters(tel.value)
+	out.endElement('phonenumber')
 
-	number = doc.createElement('phonenumber')
-	number.appendChild(doc.createTextNode(tel.value))
-	phone.appendChild(number)
+	out.endElement('Phone')
 
-	contact.appendChild(phone)
+	out.endElement('Contact')
 
-	element.appendChild(contact)
+out.endElement('AddressBook')
 
-print doc.toxml()
+out.endDocument()
+
+print
 
