@@ -9,6 +9,6 @@ names are replaced by the type of the number (Work, Home, Cell, ..) for contacts
 with multiple numbers and some special characters are replaced by an
 approximation.
 
-The code is tested with vCards created by `kadressbook` and a Grandstream
-GXP2100.
+The code is tested with vCards created by `kaddressbook` and a Grandstream
+GXP2100. It depends on the Python 2.x and the module `vobject`.
 
