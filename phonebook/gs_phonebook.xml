@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+#-*- coding: UTF-8 -*-
+# vim:filetype=python
+
+import sys
+import os
+import os.path
+
+import xml.dom.minidom
+
+import vobject
+
+import cgitb
+cgitb.enable()
+
+import codecs
+import locale
+
+VCARD_DIR = "~/.phone/"
+
+def sanitize(txt):
+    replaces = [
+	    (u"ä", "ae"),
+	    (u"ö", "oe"),
+	    (u"ü", "ue"),
+	    (u"ß", "ss"),
+	    ]
+
+    cur = txt
+
+    for special, repl in replaces:
+	cur = cur.replace(special, repl)
+
+    return cur
+
+print "Content-Type: text/xml"
+print
+
+impl = xml.dom.minidom.getDOMImplementation()
+doc = impl.createDocument(None, 'AddressBook', None)
+element = doc.documentElement
+
+vcard_path = os.path.expanduser(VCARD_DIR)
+
+for fn in os.listdir(vcard_path):
+    path = os.path.join(vcard_path, fn)
+
+    vcard = vobject.readOne(open(path))
+
+    for tel in vcard.contents['tel']:
+	contact = doc.createElement('Contact')
+
+	phone = doc.createElement('Phone')
+
+	last = doc.createElement('LastName')
+	last.appendChild(doc.createTextNode(tel.params['TYPE'][0].capitalize()))
+	contact.appendChild(last)
+
+	first = doc.createElement('FirstName')
+	first.appendChild(doc.createTextNode(sanitize(vcard.n.value.given)))
+	contact.appendChild(first)
+
+	phone = doc.createElement('Phone')
+
+	number = doc.createElement('phonenumber')
+	number.appendChild(doc.createTextNode(tel.value))
+	phone.appendChild(number)
+
+	contact.appendChild(phone)
+
+	element.appendChild(contact)
+
+print doc.toxml()
+
