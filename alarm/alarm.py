@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ##############################################################################
 ##
-##  Copyright (C) 2010 Thammi
+##  Copyright (C) 2010-2012 Thammi
 ##  
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ start = time()
 if len(argv) > 1:
     raw = argv[1:]
 else:
-    raw = raw_input("Enter time to wait: ").split()
+    raw = input("Enter time to wait: ").split()
 
 # do we have a message?
 if "--" in raw:
@@ -98,12 +98,12 @@ try:
         sleep((target - time()) % 1)
 except KeyboardInterrupt:
     display("Interrupted by the user!")
-    print
+    print()
 
     exit(1)
 else:
     display(msg)
-    print
+    print()
 
     system(SOUND_CMD % SOUND_FILE)
     message(msg)
