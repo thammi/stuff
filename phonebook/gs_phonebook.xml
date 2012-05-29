@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-#-*- coding: UTF-8 -*-
+#!/usr/bin/env python3
 # vim:filetype=python
 ###############################################################################
 ##
@@ -36,10 +35,10 @@ VCARD_DIR = "/home/thammi/.phone/"
 
 def sanitize(txt):
     replaces = [
-	    (u"ä", "ae"),
-	    (u"ö", "oe"),
-	    (u"ü", "ue"),
-	    (u"ß", "ss"),
+	    ("ä", "ae"),
+	    ("ö", "oe"),
+	    ("ü", "ue"),
+	    ("ß", "ss"),
 	    ]
 
     cur = txt
@@ -49,8 +48,8 @@ def sanitize(txt):
 
     return cur
 
-print "Content-Type: text/xml"
-print
+print("Content-Type: text/xml")
+print()
 
 class SimpleXMLGenerator(XMLGenerator):
 
@@ -106,5 +105,5 @@ out.endElement('AddressBook')
 
 out.endDocument()
 
-print
+print()
 
