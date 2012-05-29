@@ -123,7 +123,7 @@ def play(coll):
 
 def error_msg(msg):
     if sys.stdout.isatty():
-        print "ERROR: " + msg
+        print("ERROR: " + msg)
     else:
         return os.system(error_cmd % msg)
 
@@ -141,9 +141,9 @@ def repeat(coll):
 
 def jump(coll):
     for diff, file_name in coll.environment(3):
-        print "%2i: %s" % (diff, file_name)
+        print("%2i: %s" % (diff, file_name))
 
-    inp = raw_input("Jump to? ")
+    inp = input("Jump to? ")
     coll.move(int(inp))
 
     coll.save()
@@ -172,9 +172,9 @@ def main(argv):
         coll = Collection()
         commands[cmd](coll)
     else:
-        print "Command not known. Try a valid one ;)"
+        print("Command not known. Try a valid one ;)")
         for cmd in sorted(commands):
-            print "-", cmd
+            print("-", cmd)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
