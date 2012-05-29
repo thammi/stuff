@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+#-*- coding: UTF-8 -*-
+# vim:filetype=python
+###############################################################################
+##
+##  Copyright (C) 2012  Thammi
+## 
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU Affero General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+## 
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU Affero General Public License for more details.
+## 
+##  You should have received a copy of the GNU Affero General Public License
+##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+###############################################################################
+
+import sys
+import os
+import os.path
+
+from xml.sax.saxutils import XMLGenerator
+from xml.sax.xmlreader import AttributesNSImpl
+
+import vobject
+
+import cgitb
+cgitb.enable()
+
+VCARD_DIR = "/home/thammi/.phone/"
+
+def sanitize(txt):
+    replaces = [
+	    (u"ä", "ae"),
+	    (u"ö", "oe"),
+	    (u"ü", "ue"),
+	    (u"ß", "ss"),
+	    ]
+
+    cur = txt
+
+    for special, repl in replaces:
+	cur = cur.replace(special, repl)
+
+    return cur
+
+print "Content-Type: text/xml"
+print
+
+class SimpleXMLGenerator(XMLGenerator):
+
+    def startElement(self, name, attrs=None):
+	if attrs == None:
+	    attrs = AttributesNSImpl({}, {})
+
+        XMLGenerator.startElement(self, name, attrs)
+
+out = SimpleXMLGenerator(sys.stdout, 'utf-8')
+out.startDocument()
+out.startElement('AddressBook')
+
+vcard_path = os.path.expanduser(VCARD_DIR)
+
+for fn in os.listdir(vcard_path):
+    path = os.path.join(vcard_path, fn)
+
+    vcard = vobject.readOne(open(path))
+
+    if 'tel' not in vcard.contents:
+	continue
+
+    tel_entries = vcard.contents['tel']
+
+    for tel in tel_entries:
+	out.startElement('Contact')
+
+	out.startElement('LastName')
+
+	if len(tel_entries) > 1:
+	    out.characters(tel.params['TYPE'][0].capitalize())
+	else:
+	    out.characters(sanitize(vcard.n.value.family))
+
+	out.endElement('LastName')
+
+	out.startElement('FirstName')
+	out.characters(sanitize(vcard.n.value.given))
+	out.endElement('FirstName')
+
+	out.startElement('Phone')
+
+	out.startElement('phonenumber')
+	out.characters(tel.value)
+	out.endElement('phonenumber')
+
+	out.endElement('Phone')
+
+	out.endElement('Contact')
+
+out.endElement('AddressBook')
+
+out.endDocument()
+
+print
+
