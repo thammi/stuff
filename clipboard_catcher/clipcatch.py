@@ -38,9 +38,6 @@ class Catcher(QtGui.QWidget):
 
         layout = QtGui.QVBoxLayout(self)
 
-        if default == None:
-            default = ''
-
         self.regex = regex = QtGui.QLineEdit(default, self)
         layout.addWidget(regex)
 
@@ -58,7 +55,7 @@ class Catcher(QtGui.QWidget):
         pattern = str(self.regex.text())
         data = str(self.board.text())
 
-        if re.search(pattern, data):
+        if not pattern or re.search(pattern, data):
             dump = self.dump
             dump.moveCursor(QtGui.QTextCursor.End)
             self.dump.insertPlainText(data + '\n')
@@ -69,7 +66,7 @@ def main():
     config = configparser.ConfigParser()
     config.read(os.path.expanduser(CONFIG_FILE))
 
-    default = config.get('default', 'filter', fallback=DEFAULT_FILTER)
+    default = config.get('default', 'filter', fallback='')
 
     catcher = Catcher(default)
     catcher.show()
