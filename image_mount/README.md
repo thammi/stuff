@@ -27,6 +27,6 @@ Check out this repository and run
 
 in this directory.
 
-You have to have `sfdisk` installed. That should be the case on most default
-Linux installations.
+The script is written in Python 3. You also have to have `sfdisk` installed.
+That should be the case on most default Linux installations.
 
