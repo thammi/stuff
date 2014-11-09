@@ -92,21 +92,20 @@ def print_partitions(path, mount_point):
         print(mount)
         print()
 
-def main(args):
-    if len(args) < 2:
-        print("Usage: {} IMAGE [MOUNT_POINT]".format(args[0]))
-        return 1
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: {} IMAGE [MOUNT_POINT]".format(sys.argv[0]))
+        sys.exit(1)
 
-    path = args[1]
-    mount_point = args[2] if len(args) > 2 else '/mnt'
+    path = sys.argv[1]
+    mount_point = sys.argv[2] if len(sys.argv) > 2 else '/mnt'
 
     try:
         print_partitions(path, mount_point)
     except Exception as e:
         print(e)
-
-    return 0
+        sys.exit(1)
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    main()
 
