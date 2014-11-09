@@ -27,3 +27,5 @@ Check out this repository and run
 
 in this directory.
 
+You have to have `sfdisk` installed.
+
