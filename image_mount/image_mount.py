@@ -72,7 +72,7 @@ def get_partitions(path):
     for line in lines:
         name, data = parse_line(line)
 
-        if data['start'] == 0:
+        if data['size'] == 0:
             continue
 
         partitions.append((name, data))
@@ -86,10 +86,10 @@ def print_partitions(path, mount_point):
 
     for name, data in partitions:
         mount = 'mount -o loop,offset={} {} {}'.format(to_bytes(data['start']), abs_path, mount_point)
+        size = to_bytes(data['size']) / 1024 / 1024
 
-        print(name)
-        print('size:\t{} MB'.format(to_bytes(data['size']) / 1024 / 1024))
-        print('mount:\t{}'.format(mount))
+        print('{} ({} MB):'.format(name, size))
+        print(mount)
         print()
 
 def main(args):
