@@ -79,17 +79,21 @@ def get_partitions(path):
 
     return partitions
 
-def print_partitions(path, mount_point):
+def print_partitions(path, mount_point='/mnt/', loop_dev='/dev/loop1'):
     partitions = get_partitions(path)
 
     abs_path = os.path.abspath(path)
 
     for name, data in partitions:
-        mount = 'mount -o loop,offset={} {} {}'.format(to_bytes(data['start']), abs_path, mount_point)
-        size = to_bytes(data['size']) / 1024 / 1024
+        start = to_bytes(data['start'])
+        size = to_bytes(data['size'])
 
-        print('{} ({} MB):'.format(name, size))
+        mount = 'mount -o loop,offset={},sizelimit={} {} {}'.format(start, size, abs_path, mount_point)
+        losetup = 'losetup -o {} --sizelimit {} {} {}'.format(start, size, loop_dev, abs_path)
+
+        print('{} ({} MB):'.format(name, size / 1024 / 1024))
         print(mount)
+        print(losetup)
         print()
 
 def main():
