@@ -3,7 +3,7 @@
 ## What is this?
 
 This script is designed to help you mount disk images. It will parse the
-partition table of the image using `sfdisk` and print the mount command for each
+partition table of the image using `parted` and print the mount command for each
 partition.
 
 ## Usage
@@ -27,6 +27,6 @@ Check out this repository and run
 
 in this directory.
 
-The script is written in Python 3. You also have to have `sfdisk` installed.
+The script is written in Python 3. You also have to have `parted` installed.
 That should be the case on most default Linux installations.
 
