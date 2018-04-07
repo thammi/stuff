@@ -40,6 +40,7 @@ def get_partitions(path):
         data = {
             'start': int(parts[1][:-1]),
             'size': int(parts[2][:-1]),
+            'fs': parts[4]
         }
 
         if data['size'] == 0:
@@ -57,11 +58,12 @@ def print_partitions(path, mount_point='/mnt/', loop_dev='/dev/loop1'):
     for name, data in partitions:
         start = data['start']
         size = data['size']
+        fs = data['fs']
 
         mount = 'mount -o loop,offset={},sizelimit={} {} {}'.format(start, size, abs_path, mount_point)
         losetup = 'losetup -o {} --sizelimit {} {} {}'.format(start, size, loop_dev, abs_path)
 
-        print('{} ({} MB):'.format(name, round(size / 1024 / 1024, 1)))
+        print('{} ({}, {} MB):'.format(name, fs, round(size / 1024 / 1024, 1)))
         print(mount)
         print(losetup)
         print()
