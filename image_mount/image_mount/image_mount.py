@@ -5,8 +5,8 @@ import re
 import os.path
 import subprocess
 
-def find_sfdisk():
-    locations = ['/sbin/sfdisk']
+def find_parted():
+    locations = ['/sbin/parted']
 
     for location in locations:
         if os.path.exists(location):
@@ -14,63 +14,33 @@ def find_sfdisk():
 
     return None
 
-def parse_line(line):
-    start = line.find(':')
-
-    name = line[:start].strip()
-
-    obj = {}
-
-    for part in line[start+1:].split(','):
-        parts = [i.strip() for i in part.split('=', 1)]
-
-        if len(parts) == 2:
-            key, raw = parts
-
-            if re.match('\d+', raw):
-                value = int(raw)
-            else:
-                value = raw
-
-            obj[key] = value
-        else:
-            key = parts[0]
-            obj[key] = True
-
-    return name, obj
-
-def to_bytes(value):
-    return value * 512
-
 def get_partitions(path):
-    sfdisk = find_sfdisk()
+    parted = find_parted()
 
     # run fsdisk
 
-    cmd = [sfdisk, '-ld', path]
-    raw = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    cmd = [parted, '-sm', path, 'unit', 'B', 'print']
+    raw = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
     out = raw.decode('utf-8').strip()
 
-    # looks like actual output?
+    lines = list(map(str.strip, out.split('\n')))
 
-    if not re.search('^# partition table of ', out):
-        raise Exception("sfdisk seems to be unable to read the image")
+    # verify
 
-    # find start of table
-
-    start = out.index('\n\n')
-
-    if start == -1:
-        raise Exception("Unable to parse output, cannot find start of table")
-
-    # parse table
-
-    lines = out[start:].split('\n')[2:]
+    if lines[0] != 'BYT;':
+        raise Exception("Unable to parse output, unexpected start")
 
     partitions = []
 
-    for line in lines:
-        name, data = parse_line(line)
+    for line in lines[2:]:
+        parts = line.split(':')
+
+        name = parts[0]
+
+        data = {
+            'start': int(parts[1][:-1]),
+            'size': int(parts[2][:-1]),
+        }
 
         if data['size'] == 0:
             continue
@@ -85,13 +55,13 @@ def print_partitions(path, mount_point='/mnt/', loop_dev='/dev/loop1'):
     abs_path = os.path.abspath(path)
 
     for name, data in partitions:
-        start = to_bytes(data['start'])
-        size = to_bytes(data['size'])
+        start = data['start']
+        size = data['size']
 
         mount = 'mount -o loop,offset={},sizelimit={} {} {}'.format(start, size, abs_path, mount_point)
         losetup = 'losetup -o {} --sizelimit {} {} {}'.format(start, size, loop_dev, abs_path)
 
-        print('{} ({} MB):'.format(name, size / 1024 / 1024))
+        print('{} ({} MB):'.format(name, round(size / 1024 / 1024, 1)))
         print(mount)
         print(losetup)
         print()
